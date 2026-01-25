@@ -2,6 +2,7 @@ keyboard = require "keyboard"
 deep_sky = require "deep_sky"
 drawer = require "drawer"
 planets = require "planets"
+color_themes = require "color_themes"
 
 function love.load()
 	angle = 0
@@ -10,8 +11,8 @@ function love.load()
 	angular_velocity = 0
 	current_game_state = "menu"
 
-	playerx = 270
-	playery = 250
+	playerx = 0
+	playery = 0
 
 	keyboard.hello()
 	keyboard.register_key_binding("run_game", "up", function ()
@@ -42,7 +43,7 @@ function love.load()
 		love.event.quit()
 	end)
 
-	drawer.register_draw_action("run_game", game_draw)
+	drawer.register_draw_action("run_game", function() deep_sky.draw() draw_player() draw_planets() end)
 	drawer.register_draw_action("menu", function() love.graphics.print("Press n for a new game, \n! to quit", 100, 100) end)
 	drawer.register_draw_action("game_over", game_over_draw)
 
@@ -54,32 +55,37 @@ function love.draw()
 	drawer.draw(current_game_state)
 end
 
-function game_draw()
-	deep_sky.draw()
-
+function draw_player()
 	local middle_h = love.graphics.getHeight()/2
 	local middle_w = love.graphics.getWidth()/2
 
+	love.graphics.setColor(color_themes.prothagonist_green.red, color_themes.prothagonist_green.green, color_themes.prothagonist_green.blue)
 	love.graphics.line(middle_w + 10*math.cos(angle), middle_h + 10*math.sin(angle), 
 		middle_w + 10*math.cos(angle + math.pi*0.9), middle_h + 10*math.sin(angle + math.pi*0.9))
 
 	love.graphics.line(middle_w + 10*math.cos(angle), middle_h + 10*math.sin(angle), 
 		middle_w + 10*math.cos(angle - math.pi*0.9), middle_h + 10*math.sin(angle - math.pi*0.9))
 
-	draw_planets(middle_w, middle_h)
 	draw_minimap(700, 550)
 
+	-- speedometer
 	love.graphics.line(700, 200, 700 + 5 * speed_x, 200 + 5 * speed_y)
 end
 
 
-function draw_planets(middle_w, middle_h)
+function draw_planets()
+	return draw_planets_with_camera(playerx, playery)
+end
+
+function draw_planets_with_camera(camera_x, camera_y)
+	local center_screen_h = love.graphics.getHeight()/2
+	local center_screen_w = love.graphics.getWidth()/2
 	local r, g, b = love.graphics.getColor()
 	for i = 1,#planets do
 		love.graphics.setColor(planets[i].red, planets[i].green, planets[i].blue, 0.25)
-		love.graphics.circle("fill", middle_w + (planets[i].x-playerx), middle_h + (planets[i].y-playery), planets[i].radius*1.25)
+		love.graphics.circle("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius*1.25)
 		love.graphics.setColor(planets[i].red, planets[i].green, planets[i].blue)
-		love.graphics.circle("fill", middle_w + (planets[i].x-playerx), middle_h + (planets[i].y-playery), planets[i].radius)
+		love.graphics.circle("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius)
 	end
 	love.graphics.setColor(r, g, b)
 end
@@ -88,9 +94,11 @@ end
 function draw_minimap(screen_x, screen_y)
 	local minimap_scale = 100
 
+	love.graphics.setColor(color_themes.prothagonist_green.red, color_themes.prothagonist_green.green, color_themes.prothagonist_green.blue)
 	love.graphics.circle("fill", screen_x, screen_y, 2)
 	
 	for i = 1,#planets do
+		love.graphics.setColor(planets[i].red, planets[i].green, planets[i].blue)
 		local minimap_diff_x = (planets[i].x - playerx)/minimap_scale
 		local minimap_diff_y = (planets[i].y - playery)/minimap_scale
 		love.graphics.circle("fill", screen_x + minimap_diff_x , screen_y + minimap_diff_y, 2)
@@ -146,6 +154,7 @@ function beep()
 		soundData:setSample(i, math.sin(tone_number*2*math.pi*i/rate))
 	end
 	local source = love.audio.newSource(soundData)
+	source:setVolume(0.1)
 	source:play()
 end
 

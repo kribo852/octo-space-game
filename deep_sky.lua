@@ -1,7 +1,7 @@
+color_themes = require "color_themes"
+
 local deep_sky = {
-	red_theme = {red=0.75, green=0.1, blue=0.125},
-	white_theme = {red=0.88, green=0.88, blue=0.93},
-	background = {red=0.01, green=0.03, blue=0.06}
+
 }
 
 function deep_sky.init_stars()
@@ -13,10 +13,10 @@ function deep_sky.init_stars()
 end
 
 function deep_sky.draw() 
-	love.graphics.setBackgroundColor(deep_sky.background.red, deep_sky.background.green, deep_sky.background.blue)
+	love.graphics.setBackgroundColor(color_themes.background.red, color_themes.background.green, color_themes.background.blue)
 	local r, g, b = love.graphics.getColor()
 	for i=1,#deep_sky.star_array do
-		love.graphics.setColor(deep_sky.white_theme.red, deep_sky.white_theme.green, deep_sky.white_theme.blue, 0.25)
+		love.graphics.setColor(color_themes.white_theme.red, color_themes.white_theme.green, color_themes.white_theme.blue, 0.25)
 		love.graphics.rectangle("fill", deep_sky.star_array[i].x, deep_sky.star_array[i].y, 3, 3)
 	end
 	love.graphics.setColor(r, g, b)

@@ -2,10 +2,10 @@ planets = {}
 
 function planets.initialize_planets()
 
-	local deep_sky = require "deep_sky"
+	local color_themes = require "color_themes"
 
 	for i=1,10 do
-		local colortypes = {deep_sky.red_theme, deep_sky.white_theme}
+		local colortypes = {color_themes.red_theme, color_themes.white_theme}
 		local select = love.math.random(#colortypes)
 		planets[i] = {
 					x=love.math.random(-3000, 3000), 
