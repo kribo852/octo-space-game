@@ -4,12 +4,14 @@ function planets.initialize_planets()
 
 	local color_themes = require "color_themes"
 
-	for i=1,10 do
+	for i=1,25 do
 		local colortypes = {color_themes.red_theme, color_themes.white_theme}
 		local select = love.math.random(#colortypes)
+		local radius = math.sqrt(love.math.random(3000*3000))
+		local angle = 2.0*math.pi*love.math.random()
 		planets[i] = {
-					x=love.math.random(-3000, 3000), 
-					y=love.math.random(-3000, 3000), 
+					x=radius * math.cos(angle), 
+					y=radius * math.sin(angle), 
 					red=colortypes[select].red, 
 					green=colortypes[select].green, 
 					blue=colortypes[select].blue,

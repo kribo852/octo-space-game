@@ -1,7 +1,7 @@
 local keyboard = {}
 
 function keyboard.hello()
-    print("Hello World!")
+    print("Keyboard is online!")
 end
 
 function keyboard.register_key_binding(game_state, key, action)
