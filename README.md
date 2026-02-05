@@ -1,4 +1,4 @@
-# A space shooter game project using the Love 2D Lua framework
+# A space dodger game project using the Love 2D Lua framework
 
 
 ## installation
@@ -9,11 +9,25 @@ install the Love 2D framework to run the game
 Control the spaceship with the keys "up", "left" and "right"
 Jump wormholes with the key "w"
 
-Avoid crashing into planets.
+Avoid crashing into planets. Look out for the enemies
 
 ## Design of the code
 there are three lua modules that work in a similar fashion  
 
-- keyboard.lua, here most keyboard interaction is registered. Different game states can have different keys registered. 
+- keyboard.lua, here most keyboard interactions are registered. Different game states can have different keys registered. 
 - drawer.lua, here all the screen drawing is registered.
 - action_runner.lua here all actions are registered and run each game tick. functions run in the action_runner shall return true if they are active, and false if they are spent and shall be discarded. The main game action is discarded when the player dies, and the wormhole action is discarded when the player has traveled the worm hole.  
+
+## Current state of the project
+The game is fully functional, but there are a lot of small things that I would like to do
+
+- some refactoring, to help implement additional features
+- remove enemies and lasers that are too far away from the player
+- play a little beep when the enemies fire a laser
+- make the enemies crash into planets, to remove them from the game
+- debris, that makes it easier to see which direction the player is traveling
+- A life meter, so the player can get hit multiple times by enem lasers, this would open up for enemies fireing more frequently
+- after game over, show the score achived on the game over screen
+- converting player speed with a key press, to energy, to open wormholes
+- better configuration for meters, score, map, speed, life, energy ...
+

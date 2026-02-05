@@ -1,5 +1,5 @@
 
--- continue action?
+-- runs actions, if the result is false (not continue) then that action is removed
 local actions = {
 
 }
@@ -12,7 +12,7 @@ end
 function actions.run_actions()
 	local removed = {}
 
-	print("all added actions length "..#actions)
+	--print("all added actions length "..#actions)
 
 	for i=1,#actions do
 		local result_continue_action = actions[i]();
@@ -29,9 +29,6 @@ function actions.run_actions()
 	end
 
 end
-
--- import functions that gives the player, planets 
-
 
 function actions.reverse(tab)
     for i = 1,math.floor((#tab)/2) do

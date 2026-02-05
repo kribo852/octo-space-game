@@ -25,12 +25,14 @@ function player.move()
 	player.x = player.x + player.speed_x
 	player.y = player.y + player.speed_y
 
-	player.angular_velocity = player.angular_velocity - 0.0075 * player.angular_velocity 
+	player.angular_velocity = player.angular_velocity - 0.015 * player.angular_velocity 
 end
 
 function player.jump_wormhole()
-	player.x = player.x + 350 * math.cos(player.angle)
-	player.y = player.y + 350 * math.sin(player.angle)
+	local distance = 450
+
+	player.x = player.x + distance * math.cos(player.angle)
+	player.y = player.y + distance * math.sin(player.angle)
 end
 
 
