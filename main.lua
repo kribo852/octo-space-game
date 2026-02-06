@@ -8,6 +8,7 @@ player = require "player"
 opponents = require "opponents"
 
 function love.load()
+	love.window.setTitle( "Escape space pirates" )
 	current_game_state = "menu"
 	score = 0 
 
@@ -121,6 +122,7 @@ end
 
 function game_over_draw()
 	deep_sky.draw()
+	draw_score()
 	color_themes.apply_color(color_themes.white_theme, love.graphics.setColor)
 	love.graphics.print("Game over\nPress n for a new game,\n! to quit", 100, 100)
 end

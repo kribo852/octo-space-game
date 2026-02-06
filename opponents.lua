@@ -6,38 +6,37 @@ opponents = {
 function opponents.update()
 	opponents.move()
 
-	if not timer then
-		timer = 0
-	end
-	p_f = opponents.get_player_function
-	if math.sqrt(p_f().x^2 + p_f().y^2) < 3000 then
-		timer = timer + 1
-	else 
-		timer = timer + 100
-	end
-	if timer >= 1000 then
-		timer = 0
-		opponents.create_opponent()
-	end
+	opponents.timer_countup()
 
 	for i,o in ipairs(opponents) do
 		o.laser_counter = o.laser_counter + 0.015
 	end
 
-	p_f = opponents.get_player_function
-
 	for i,laser in ipairs(opponents.laser_beams) do
 		laser.x = laser.x + 4.5 * math.cos(laser.angle) + laser.initial_speedx
 		laser.y = laser.y + 4.5 * math.sin(laser.angle) + laser.initial_speedy
-
-	--	if math.sqrt((laser.x + p_f().x)^2 + (laser.y + p_f().y)^2) > 1000 then
-	--		laser_beams[i] = nil
-	--	end 
-
 	end
 
-	opponents.shoot()
+	opponents.remove_item(opponents.laser_beams, opponents.remove_laser)
+	opponents.remove_item(opponents, opponents.remove_far_away_opponents)
 
+	opponents.shoot()
+end
+
+function opponents.timer_countup()
+	if not opponents.timer then
+		opponents.timer = 0
+	end
+	local p_f = opponents.get_player_function
+	if math.sqrt(p_f().x^2 + p_f().y^2) < 3000 then
+		opponents.timer = opponents.timer + 1
+	else 
+		opponents.timer = opponents.timer + 100
+	end
+	if opponents.timer >= 1000 then
+		opponents.timer = 0
+		opponents.create_opponent()
+	end
 end
 
 
@@ -103,17 +102,58 @@ function opponents.clear()
 	for i=1,#opponents do
 		table.remove(opponents, 1)
 	end
+	for i=1,#opponents.laser_beams do
+		table.remove(opponents.laser_beams, 1)
+	end
 end
 
 function opponents.shoot()
 
-	player = opponents.get_player_function()
+	local player = opponents.get_player_function()
 
 	for i,o in ipairs(opponents) do
 		if math.sqrt((o.x-player.x)^2 + (o.y-player.y)^2) < 350 and o.laser_counter >= 1 then
 			o.laser_counter = 0
 			table.insert(opponents.laser_beams, {x=o.x, y=o.y, angle=o.angle + math.pi*2*0.1*(0.5 - love.math.random()), initial_speedx=o.speed_x, initial_speedy = o.speed_y})
 			print("POW")
+			opponents.laser_beep()
+		end
+	end
+end
+
+function opponents.remove_laser(laser)
+	local player = opponents.get_player_function()
+	return math.sqrt((laser.x - player.x)^2 + (laser.y - player.y)^2) > 1000
+end
+
+function opponents.remove_far_away_opponents(laser)
+	local player = opponents.get_player_function()
+	return math.sqrt((laser.x - player.x)^2 + (laser.y - player.y)^2) > 3000
+end
+
+function opponents.laser_beep() 
+	local rate      = 11000 -- samples per second
+	local length    = 1  -- 0.03125 seconds
+	local tone      = 5000.0 -- Hz
+	local soundData = love.sound.newSoundData(math.floor(length*rate), rate, 16, 1)
+	for i=0, soundData:getSampleCount() - 1 do   
+		soundData:setSample(i, math.sin(tone*2*math.pi*i^0.8/rate) + -0.02+love.math.random()*0.025)
+	end
+	local source = love.audio.newSource(soundData)
+	source:setVolume(0.1)
+	source:play()
+end
+
+function opponents.remove_item(tabl, calc_removal_function)
+	local number_removed = 0
+	for i=1,#tabl do
+		if calc_removal_function(tabl[i]) then
+			number_removed = number_removed + 1 -- add to the number of removed items
+		end
+		if number_removed + i > #tabl then
+			tabl[i] = nil -- for the tail elements, these are already moved downward
+		else
+			tabl[i] = tabl[i + number_removed] -- here we just shift elements downward 
 		end
 	end
 end
