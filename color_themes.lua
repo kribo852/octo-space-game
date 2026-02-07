@@ -3,6 +3,7 @@ local color_themes = {
 	white_theme = {red=0.75, green=0.7, blue=0.95},
 	background = {red=0.01, green=0.03, blue=0.06},
 	prothagonist_green = {red=0.15, green=0.65, blue=0.45},
+	debris_theme = {red = 0.3, green = 0.15, blue=0.2}
 }
 
 function color_themes.apply_color(rgb_obj, func, alpha)

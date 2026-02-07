@@ -9,7 +9,7 @@ function opponents.update()
 	opponents.timer_countup()
 
 	for i,o in ipairs(opponents) do
-		o.laser_counter = o.laser_counter + 0.15
+		o.laser_timer = o.laser_timer + 0.015
 	end
 
 	for i,laser in ipairs(opponents.laser_beams) do
@@ -24,17 +24,17 @@ function opponents.update()
 end
 
 function opponents.timer_countup()
-	if not opponents.timer then
-		opponents.timer = 750
+	if not opponents.spawn_timer then
+		opponents.spawn_timer = 750
 	end
 	local p_f = opponents.get_player_function
 	if math.sqrt(p_f().x^2 + p_f().y^2) < 3000 then
-		opponents.timer = opponents.timer + 1
+		opponents.spawn_timer = opponents.spawn_timer + 1
 	else 
-		opponents.timer = opponents.timer + 100
+		opponents.spawn_timer = opponents.spawn_timer + 100
 	end
-	if opponents.timer >= 1000 then
-		opponents.timer = 0
+	if opponents.spawn_timer >= 1000 then
+		opponents.spawn_timer = 0
 		opponents.create_opponent()
 	end
 end
@@ -92,9 +92,9 @@ function opponents.create_opponent()
 		x = newx, 
 		y = newy, 
 		angle = at_angle + math.pi, 
-		speed_x=opponents.get_player_function().speed_x, 
-		speed_y=opponents.get_player_function().speed_y,
-		laser_counter = 0.25 -- some preparation to fire a laser
+		speed_x = opponents.get_player_function().speed_x, 
+		speed_y = opponents.get_player_function().speed_y,
+		laser_timer = 0.25 -- some preparation to fire a laser
 	})
 end
 
@@ -108,12 +108,11 @@ function opponents.clear()
 end
 
 function opponents.shoot()
-
 	local player = opponents.get_player_function()
 
 	for i,o in ipairs(opponents) do
-		if math.sqrt((o.x-player.x)^2 + (o.y-player.y)^2) < 350 and o.laser_counter >= 1 then
-			o.laser_counter = 0
+		if math.sqrt((o.x-player.x)^2 + (o.y-player.y)^2) < 350 and o.laser_timer >= 1 then
+			o.laser_timer = 0
 			table.insert(opponents.laser_beams, {x=o.x, y=o.y, angle=o.angle + math.pi*2*0.05*(0.5 - love.math.random()), initial_speedx=o.speed_x, initial_speedy = o.speed_y})
 			print("POW")
 			opponents.laser_beep()
@@ -137,7 +136,7 @@ function opponents.laser_beep()
 	local tone      = 5000.0 -- Hz
 	local soundData = love.sound.newSoundData(math.floor(length*rate), rate, 16, 1)
 	for i=0, soundData:getSampleCount() - 1 do   
-		soundData:setSample(i, math.sin(tone*2*math.pi*i^0.8/rate) + -0.001 + love.math.random()*0.002)
+		soundData:setSample(i, math.sin(tone*2*math.pi*(i^0.8)/rate) + -0.001 + love.math.random()*0.002)
 	end
 	local source = love.audio.newSource(soundData)
 	source:setVolume(0.1)

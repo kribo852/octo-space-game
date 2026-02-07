@@ -6,6 +6,7 @@ color_themes = require "color_themes"
 action_runner = require "action_runner"
 player = require "player"
 opponents = require "opponents"
+debris = require "debris"
 
 function love.load()
 	love.window.setTitle( "Escape space pirates" )
@@ -48,7 +49,7 @@ function love.load()
 		love.event.quit()
 	end)
 
-	drawer.register_draw_action("run_game", function() deep_sky.draw() draw_player() draw_opponents() draw_planets() draw_score() draw_minimap(700, 550) draw_lifeometer(650, 450) end)
+	drawer.register_draw_action("run_game", function() deep_sky.draw() draw_debris() draw_player() draw_opponents() draw_planets() draw_score() draw_minimap(700, 550) draw_lifeometer(650, 450) end)
 	drawer.register_draw_action("menu", function() deep_sky.draw() color_themes.apply_color(color_themes.white_theme, love.graphics.setColor) love.graphics.print("Press n for a new game, \n! to quit", 100, 100) end)
 	drawer.register_draw_action("game_over", game_over_draw)
 
@@ -60,6 +61,7 @@ function reset_game()
 	planets.initialize_planets()
 	opponents.clear()
 	opponents.set_player_info(function() return player end)
+	debris.set_player_function(function() return player end)
 	score = 0
 	life = 8
 end
@@ -71,7 +73,9 @@ function update_during_active_game()
 	update_score() 
 	hit_by_lasers()
 	crash_opponents_into_planets()
-	return game_over_check() 
+	debris.update()
+	set_game_over() 
+	return not (current_game_state == "game_over" or current_game_state == "menu") -- continue running this action next update, has to account for menu 
 end
 
 function love.draw()
@@ -103,16 +107,25 @@ end
 
 function draw_planets_with_camera(camera_x, camera_y)
 	local center_screen_w,center_screen_h = screen_center()
-	local r, g, b = love.graphics.getColor()
 	for i = 1,#planets do
 		love.graphics.setColor(planets[i].red, planets[i].green, planets[i].blue, 0.25)
 		love.graphics.circle("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius*1.25)
 		color_themes.apply_color(planets[i], love.graphics.setColor)
 		love.graphics.circle("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius)
 	end
-	love.graphics.setColor(r, g, b)
 end
 
+function draw_debris()
+	return draw_debris_with_camera(player.x, player.y)
+end
+
+function draw_debris_with_camera(camera_x, camera_y)
+	local center_screen_w,center_screen_h = screen_center()
+	for i = 1,#debris do
+		color_themes.apply_color(color_themes.debris_theme, love.graphics.setColor)
+		love.graphics.circle("fill", center_screen_w + (debris[i].x-camera_x), center_screen_h + (debris[i].y-camera_y), 3)
+	end
+end
 
 function draw_minimap(screen_x, screen_y)
 	local minimap_scale = 100
@@ -193,7 +206,7 @@ function apply_gravitation()
 	end
 end
 
-function game_over_check()
+function set_game_over()
 	for i=1,#planets do
 		distance = math.sqrt( (planets[i].x - player.x)^2 + (planets[i].y - player.y)^2)
 		if( distance < planets[i].radius ) then
@@ -205,8 +218,6 @@ function game_over_check()
 	if life <= 0 then
 		current_game_state = "game_over"
 	end
-
-	return not (current_game_state == "game_over")
 end
 
 function crash_opponents_into_planets()
@@ -243,6 +254,9 @@ function wormhole()
 		local timer = 0
 		print("worm hole")
 		return function()
+			if timer == 0 then
+				wormhole_beep()
+			end
 			timer = timer + 1
 			player.animation = timer/45
 
@@ -263,16 +277,35 @@ end
 
 function beep() 
 	local rate      = 10000 -- samples per second
-	local length    = 10  -- 0.03125 seconds
+	local length    = 10  -- seconds
 	local tone      = 300.0 -- Hz
-	local p         = math.floor(rate/tone) -- 100 (wave length in samples)
 	local soundData = love.sound.newSoundData(math.floor(length*rate), rate, 16, 1)
 	for i=0, soundData:getSampleCount() - 1 do
-		tone_number = tone*math.pow(math.sqrt(2^0.5), 1 + math.floor((2*i) / rate)%10)   
+		local tone_number = tone*math.pow(math.sqrt(2^0.5), 1 + math.floor((2*i) / rate)%10)   
 		soundData:setSample(i, math.sin(tone_number*2*math.pi*i/rate))
 	end
 	local source = love.audio.newSource(soundData)
 	source:setVolume(0.1)
 	source:play()
 end
+
+function wormhole_beep()
+	local rate      = 10000 -- samples per second
+	local length    = 2  -- seconds
+	local tone      = 300.0 -- Hz
+	local soundData = love.sound.newSoundData(math.floor(length*rate), rate, 16, 1)
+	for i=0, soundData:getSampleCount() - 1 do   
+
+		if i <  0.3 * rate then
+			soundData:setSample(i, -1 + 2 * love.math.random())
+		else
+			local distorted_frequency = 0.8 + 0.2 * math.sin(5*math.pi*i/rate)
+			soundData:setSample(i, math.sin(tone*2*math.pi*i*distorted_frequency/rate))
+		end
+	end
+	local source = love.audio.newSource(soundData)
+	source:setVolume(0.1)
+	source:play()
+end
+
 
