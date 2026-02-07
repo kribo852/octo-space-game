@@ -24,10 +24,11 @@ The game is fully functional, but there are a lot of small things that I would l
 - [ ] some refactoring, to help implement additional features
 - [x] remove enemies and lasers that are too far away from the player, this is to avoid using unnesseccary memory
 - [x] play a little beep when the enemies fire a laser
-- [ ] make the enemies crash into planets, to remove them from the game
+- [x] make the enemies crash into planets, to remove them from the game
 - [ ] debris, that makes it easier to see which direction the player is traveling
-- [ ] A life meter, so the player can get hit multiple times by enemy lasers, this would open up for enemies fireing more frequently
+- [x] a life meter, so the player can get hit multiple times by enemy lasers, this would open up for enemies fireing more frequently
 - [x] after game over, show the score achived on the game over screen 
 - [ ] converting player speed with a key press, to energy, to open wormholes
 - [ ] better configuration for meters, score, map, speed, life, energy ...
+- [ ] save high scores to a file
 

@@ -10,7 +10,6 @@ opponents = require "opponents"
 function love.load()
 	love.window.setTitle( "Escape space pirates" )
 	current_game_state = "menu"
-	score = 0 
 
 	keyboard.hello()
 	keyboard.register_key_binding("run_game", "up", function ()
@@ -28,7 +27,7 @@ function love.load()
 	keyboard.register_key_binding("menu", "n", function ()
 		current_game_state = "run_game"
 		reset_game()
-		action_runner.add_action(function () apply_gravitation() player.move() opponents.update() update_score() return game_over_check() end)
+		action_runner.add_action(update_during_active_game)
 	end)
 
 	keyboard.register_key_binding("run_game", "escape", function ()
@@ -42,14 +41,14 @@ function love.load()
 	keyboard.register_key_binding("game_over", "n", function ()
 		current_game_state = "run_game"
 		reset_game()
-		action_runner.add_action(function () apply_gravitation() player.move() opponents.update() update_score() return game_over_check() end)
+		action_runner.add_action(update_during_active_game)
 	end)
 
 	keyboard.register_key_binding("game_over", "1", function ()
 		love.event.quit()
 	end)
 
-	drawer.register_draw_action("run_game", function() deep_sky.draw() draw_player() draw_opponents() draw_planets() draw_score() end)
+	drawer.register_draw_action("run_game", function() deep_sky.draw() draw_player() draw_opponents() draw_planets() draw_score() draw_minimap(700, 550) draw_lifeometer(650, 450) end)
 	drawer.register_draw_action("menu", function() deep_sky.draw() color_themes.apply_color(color_themes.white_theme, love.graphics.setColor) love.graphics.print("Press n for a new game, \n! to quit", 100, 100) end)
 	drawer.register_draw_action("game_over", game_over_draw)
 
@@ -62,6 +61,17 @@ function reset_game()
 	opponents.clear()
 	opponents.set_player_info(function() return player end)
 	score = 0
+	life = 8
+end
+
+function update_during_active_game() 
+	apply_gravitation() 
+	player.move() 
+	opponents.update() 
+	update_score() 
+	hit_by_lasers()
+	crash_opponents_into_planets()
+	return game_over_check() 
 end
 
 function love.draw()
@@ -81,11 +91,9 @@ function draw_player()
 		love.graphics.circle("fill", middle_w + 12*math.cos(player.angle) + 200* player.animation *math.cos(player.angle), middle_h + 12*math.sin(player.angle) + 200 * player.animation *math.sin(player.angle), 12)
 	end
 
-	draw_minimap(700, 550)
-
 	-- speedometer
 	color_themes.apply_color(color_themes.white_theme, love.graphics.setColor)
-	love.graphics.line(700, 200, 700 + 5 * player.speed_x, 200 + 5 * player.speed_y)
+	love.graphics.line(700, 200, 700 + 20 * player.speed_x, 200 + 20 * player.speed_y)
 end
 
 
@@ -136,7 +144,7 @@ function draw_opponents()
 
 	color_themes.apply_color(color_themes.red_theme, love.graphics.setColor, 0.85)
 	for i,laser in ipairs(opponents.laser_beams) do
-		love.graphics.circle("fill", middle_w + laser.x - player.x, middle_h + laser.y - player.y, 4)
+		love.graphics.circle("fill", middle_w + laser.x - player.x, middle_h + laser.y - player.y, 3)
 	end
 
 end
@@ -151,6 +159,11 @@ end
 function draw_score()
 	color_themes.apply_color(color_themes.prothagonist_green, love.graphics.setColor)
 	love.graphics.print("Score "..score)
+end
+
+function draw_lifeometer(xpos, ypos)
+	color_themes.apply_color(color_themes.prothagonist_green, love.graphics.setColor)
+	love.graphics.rectangle("fill", xpos, ypos, 12.5*life+1, 5)
 end
 
 function love.update()
@@ -189,20 +202,41 @@ function game_over_check()
 		end
 	end
 
-	for index,laser in ipairs(opponents.laser_beams) do
-		if(math.sqrt((player.x - laser.x)^2 + (player.y - laser.y)^2 ) < 5) then
-			current_game_state = "game_over"
-		end
+	if life <= 0 then
+		current_game_state = "game_over"
 	end
 
-
 	return not (current_game_state == "game_over")
+end
+
+function crash_opponents_into_planets()
+
+	local crash = function(opponent)
+		for i,planet in ipairs(planets) do
+			local diff_x = opponent.x - planet.x
+			local diff_y = opponent.y - planet.y
+
+			if math.sqrt(diff_x^2 + diff_y^2) < planet.radius  then 
+				return true
+			end 
+		end
+		return false
+	end
+
+	opponents.remove_item(opponents, crash)
 end
 
 function update_score()
 	score = score + 1
 end
 
+function hit_by_lasers()
+	for index,laser in ipairs(opponents.laser_beams) do
+		if(math.sqrt((player.x - laser.x)^2 + (player.y - laser.y)^2 ) < 6) then
+			life = life - 1
+		end
+	end
+end
 
 function wormhole()
 	if player.animation < 0.001 then --only start if there is no current wormhole

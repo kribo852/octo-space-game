@@ -9,12 +9,12 @@ function opponents.update()
 	opponents.timer_countup()
 
 	for i,o in ipairs(opponents) do
-		o.laser_counter = o.laser_counter + 0.015
+		o.laser_counter = o.laser_counter + 0.15
 	end
 
 	for i,laser in ipairs(opponents.laser_beams) do
-		laser.x = laser.x + 4.5 * math.cos(laser.angle) + laser.initial_speedx
-		laser.y = laser.y + 4.5 * math.sin(laser.angle) + laser.initial_speedy
+		laser.x = laser.x + 8 * math.cos(laser.angle) + laser.initial_speedx
+		laser.y = laser.y + 8 * math.sin(laser.angle) + laser.initial_speedy
 	end
 
 	opponents.remove_item(opponents.laser_beams, opponents.remove_laser)
@@ -25,7 +25,7 @@ end
 
 function opponents.timer_countup()
 	if not opponents.timer then
-		opponents.timer = 0
+		opponents.timer = 750
 	end
 	local p_f = opponents.get_player_function
 	if math.sqrt(p_f().x^2 + p_f().y^2) < 3000 then
@@ -114,7 +114,7 @@ function opponents.shoot()
 	for i,o in ipairs(opponents) do
 		if math.sqrt((o.x-player.x)^2 + (o.y-player.y)^2) < 350 and o.laser_counter >= 1 then
 			o.laser_counter = 0
-			table.insert(opponents.laser_beams, {x=o.x, y=o.y, angle=o.angle + math.pi*2*0.1*(0.5 - love.math.random()), initial_speedx=o.speed_x, initial_speedy = o.speed_y})
+			table.insert(opponents.laser_beams, {x=o.x, y=o.y, angle=o.angle + math.pi*2*0.05*(0.5 - love.math.random()), initial_speedx=o.speed_x, initial_speedy = o.speed_y})
 			print("POW")
 			opponents.laser_beep()
 		end
@@ -126,18 +126,18 @@ function opponents.remove_laser(laser)
 	return math.sqrt((laser.x - player.x)^2 + (laser.y - player.y)^2) > 1000
 end
 
-function opponents.remove_far_away_opponents(laser)
+function opponents.remove_far_away_opponents(opponent)
 	local player = opponents.get_player_function()
-	return math.sqrt((laser.x - player.x)^2 + (laser.y - player.y)^2) > 3000
+	return math.sqrt((opponent.x - player.x)^2 + (opponent.y - player.y)^2) > 3000
 end
 
 function opponents.laser_beep() 
-	local rate      = 11000 -- samples per second
-	local length    = 1  -- 0.03125 seconds
+	local rate      = 40000 -- samples per second
+	local length    = 0.3  -- 0.03125 seconds
 	local tone      = 5000.0 -- Hz
 	local soundData = love.sound.newSoundData(math.floor(length*rate), rate, 16, 1)
 	for i=0, soundData:getSampleCount() - 1 do   
-		soundData:setSample(i, math.sin(tone*2*math.pi*i^0.8/rate) + -0.02+love.math.random()*0.025)
+		soundData:setSample(i, math.sin(tone*2*math.pi*i^0.8/rate) + -0.001 + love.math.random()*0.002)
 	end
 	local source = love.audio.newSource(soundData)
 	source:setVolume(0.1)
