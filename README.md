@@ -7,7 +7,7 @@ install the Love 2D framework to run the game
 
 ## Controls
 Control the spaceship with the keys "up", "left" and "right"
-Jump wormholes with the key "w"
+Jump wormholes with the key "space"
 
 Avoid crashing into planets. Look out for the enemies
 
