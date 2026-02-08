@@ -108,10 +108,14 @@ end
 function draw_planets_with_camera(camera_x, camera_y)
 	local center_screen_w,center_screen_h = screen_center()
 	for i = 1,#planets do
-		love.graphics.setColor(planets[i].red, planets[i].green, planets[i].blue, 0.25)
-		love.graphics.circle("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius*1.25)
+		love.graphics.setColor(planets[i].red, planets[i].green, planets[i].blue, 0.15)
+		love.graphics.circle("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius*1.45)
+		
 		color_themes.apply_color(planets[i], love.graphics.setColor)
-		love.graphics.circle("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius)
+		love.graphics.arc("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius, -math.pi/2+math.pi/12, math.pi/2+math.pi/12, 16)
+		
+		color_themes.apply_color({red=planets[i].red*0.125, green=planets[i].green*0.125, blue=planets[i].blue*0.125}, love.graphics.setColor)
+		love.graphics.arc("fill", center_screen_w + (planets[i].x-camera_x), center_screen_h + (planets[i].y-camera_y), planets[i].radius, math.pi/2+math.pi/12, 3*math.pi/2+math.pi/12, 16)
 	end
 end
 
@@ -172,6 +176,7 @@ end
 function draw_score()
 	color_themes.apply_color(color_themes.prothagonist_green, love.graphics.setColor)
 	love.graphics.print("Score "..score)
+	love.graphics.print(string.format("mem.use KB %d", collectgarbage("count")), 550)
 end
 
 function draw_lifeometer(xpos, ypos)

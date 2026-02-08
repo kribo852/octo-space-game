@@ -1,5 +1,6 @@
 opponents = { 
-	laser_beams = {}
+	laser_beams = {},
+	speed_of_light = 8 -- This is the speed of enemy lasers, relative to their ship
 }
 
 
@@ -13,8 +14,8 @@ function opponents.update()
 	end
 
 	for i,laser in ipairs(opponents.laser_beams) do
-		laser.x = laser.x + 8 * math.cos(laser.angle) + laser.initial_speedx
-		laser.y = laser.y + 8 * math.sin(laser.angle) + laser.initial_speedy
+		laser.x = laser.x + opponents.speed_of_light * math.cos(laser.angle) + laser.initial_speedx
+		laser.y = laser.y + opponents.speed_of_light * math.sin(laser.angle) + laser.initial_speedy
 	end
 
 	opponents.remove_item(opponents.laser_beams, opponents.remove_laser)
@@ -111,9 +112,16 @@ function opponents.shoot()
 	local player = opponents.get_player_function()
 
 	for i,o in ipairs(opponents) do
-		if math.sqrt((o.x-player.x)^2 + (o.y-player.y)^2) < 350 and o.laser_timer >= 1 then
+		local tmp_dist = math.sqrt((o.x-player.x)^2 + (o.y-player.y)^2)
+		if tmp_dist < 350 and o.laser_timer >= 1 then
 			o.laser_timer = 0
-			table.insert(opponents.laser_beams, {x=o.x, y=o.y, angle=o.angle + math.pi*2*0.05*(0.5 - love.math.random()), initial_speedx=o.speed_x, initial_speedy = o.speed_y})
+			local laser_angle = o.angle + math.pi*2*0.05*(0.5 - love.math.random())
+			if tmp_dist >=150 then
+				--smart angle calc
+				laser_angle = opponents.calc_smart_angle(o, 50)
+			end
+
+			table.insert(opponents.laser_beams, {x=o.x, y=o.y, angle=laser_angle, initial_speedx=o.speed_x, initial_speedy = o.speed_y})
 			print("POW")
 			opponents.laser_beep()
 		end
@@ -128,6 +136,25 @@ end
 function opponents.remove_far_away_opponents(opponent)
 	local player = opponents.get_player_function()
 	return math.sqrt((opponent.x - player.x)^2 + (opponent.y - player.y)^2) > 3000
+end
+
+function opponents.calc_smart_angle(opponent, precision)
+	local p_func = opponents.get_player_function
+	local dist = math.sqrt((opponent.x - p_func().x)^2 + (opponent.y - p_func().y)^2)
+	local laser_angle = opponent.angle
+	local relative_px
+	local relative_py
+
+	for i=1,precision do
+		local iterations = dist/opponents.speed_of_light
+
+		relative_px = p_func().x + iterations*(p_func().speed_x - opponent.speed_x) -- account for laser init speed and player movement
+		relative_py = p_func().y + iterations*(p_func().speed_y - opponent.speed_y) -- account for laser init speed and player movement
+		dist = math.sqrt((opponent.x - relative_px)^2 + (opponent.y - relative_py)^2)
+	end
+
+
+	return math.atan2(relative_py-opponent.y, relative_px-opponent.x)
 end
 
 function opponents.laser_beep() 

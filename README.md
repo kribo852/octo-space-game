@@ -19,7 +19,7 @@ there are three lua modules that work in a similar fashion
 - action_runner.lua here all actions are registered and run each game tick. functions run in the action_runner shall return true if they are active, and false if they are spent and shall be discarded. The main game action is discarded when the player dies, and the wormhole action is discarded when the player has traveled the worm hole.  
 
 ## Current state of the project
-The game is fully functional, but there are a lot of small things that I would like to do
+The game is fully functional, but there some small things that I consider adding still
 
 - [ ] some refactoring, to help implement additional features
 - [x] remove enemies and lasers that are too far away from the player, this is to avoid using unnesseccary memory
