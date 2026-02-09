@@ -7,8 +7,17 @@ function planets.initialize_planets()
 	for i=1,25 do
 		local colortypes = {color_themes.red_theme, color_themes.white_theme}
 		local select = love.math.random(#colortypes)
+
+		::redo_generation::
+		
 		local radius = math.sqrt(love.math.random(3000*3000))
 		local angle = 2.0*math.pi*love.math.random()
+
+		for j=1,#planets do
+			if math.sqrt((planets[j].x - radius * math.cos(angle))^2 + (planets[j].y - radius * math.sin(angle))^2) < 350 then
+				goto redo_generation
+			end
+		end
 
 		local set_aura_intensity = function () 
 									if colortypes[select] == color_themes.red_theme then 
