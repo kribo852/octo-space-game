@@ -51,7 +51,7 @@ function love.load()
 	end)
 
 	drawer.register_draw_action("run_game", function() deep_sky.draw() draw_debris() draw_player() draw_opponents() draw_planets() draw_score() draw_minimap(700, 550) draw_lifeometer(650, 450) end)
-	drawer.register_draw_action("menu", function() deep_sky.draw() color_themes.apply_color(color_themes.white_theme, love.graphics.setColor) love.graphics.print("Press n for a new game, \n! to quit", 100, 100) end)
+	drawer.register_draw_action("menu", function() deep_sky.draw() color_themes.apply_color(color_themes.white_theme, love.graphics.setColor) love.graphics.print("Press n for a new game, \n! to quit \nControl the spaceship with the arrow keys, and open a wormhole with the space key", 100, 100) end)
 	drawer.register_draw_action("game_over", game_over_draw)
 
 	beep()
