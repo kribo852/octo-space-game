@@ -1,6 +1,6 @@
 opponents = { 
 	laser_beams = {},
-	speed_of_light = 8 -- This is the speed of enemy lasers, relative to their ship
+	speed_of_light = 3.5 -- This is the speed of enemy lasers, relative to their ship
 }
 
 
@@ -63,15 +63,16 @@ function opponents.move_single(opponent)
 end
 
 function opponents.turn(opponent)
-	local new_dist_angle_plus = dist_for_angle_diff(opponent, 0.005)
-	local new_dist_angle_minus = dist_for_angle_diff(opponent, -0.005)
-	local new_dist_angle = dist_for_angle_diff(opponent, 0)
-
-	if new_dist_angle_plus < new_dist_angle and new_dist_angle_plus < new_dist_angle_minus then
-		opponent.angle = opponent.angle + 0.025
-	elseif new_dist_angle_minus < new_dist_angle and new_dist_angle_minus < new_dist_angle_plus then
-		opponent.angle = opponent.angle - 0.025
+	local min_dist = dist_for_angle_diff(opponent, 0)
+	local best_fit_angle = 0
+	for tmp_angle=-0.015,0.015,0.005 do
+		if dist_for_angle_diff(opponent, tmp_angle) < min_dist then
+			min_dist = dist_for_angle_diff(opponent, tmp_angle)
+			best_fit_angle = tmp_angle
+		end
 	end
+	--print(best_fit_angle)
+	opponent.angle = opponent.angle + best_fit_angle
 end
 
 function dist_for_angle_diff(opponent, angle_diff)
@@ -112,8 +113,12 @@ function opponents.shoot()
 	local player = opponents.get_player_function()
 
 	for i,o in ipairs(opponents) do
+		local straight_dist = dist_for_angle_diff(o, 0)
+		local upper_guard_dist = dist_for_angle_diff(o, math.pi/20)
+		local lower_guard_dist = dist_for_angle_diff(o, -math.pi/20)
+
 		local tmp_dist = math.sqrt((o.x-player.x)^2 + (o.y-player.y)^2)
-		if tmp_dist < 350 and o.laser_timer >= 1 then
+		if tmp_dist < 350 and o.laser_timer >= 1 and straight_dist < upper_guard_dist and straight_dist < lower_guard_dist then
 			o.laser_timer = 0
 			local laser_angle = o.angle + math.pi*2*0.05*(0.5 - love.math.random())
 			if tmp_dist >=150 then
