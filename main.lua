@@ -7,6 +7,7 @@ action_runner = require "action_runner"
 player = require "player"
 opponents = require "opponents"
 debris = require "debris"
+wormhole_animation = require "wormhole_animation"
 
 function love.load()
 	love.window.setTitle( "Escape space pirates" )
@@ -89,10 +90,7 @@ function draw_player()
 	draw_caret(middle_w, middle_h, player.angle)
 
 	if player.animation > 0.0001 then
-		color_themes.apply_color(color_themes.prothagonist_green, love.graphics.setColor, player.animation*0.35)
-		love.graphics.line(middle_w + 10*math.cos(player.angle), middle_h + 10*math.sin(player.angle), 
-			middle_w + 200*math.cos(player.angle), middle_h + 200*math.sin(player.angle))
-		love.graphics.circle("fill", middle_w + 12*math.cos(player.angle) + 200* player.animation *math.cos(player.angle), middle_h + 12*math.sin(player.angle) + 200 * player.animation *math.sin(player.angle), 12)
+		wormhole_animation.draw(middle_w, middle_h, player.angle, player.animation)
 	end
 
 	-- speedometer
@@ -263,7 +261,7 @@ function wormhole()
 				wormhole_beep()
 			end
 			timer = timer + 1
-			player.animation = timer/45
+			player.animation = timer/100
 
 			if player.animation >= 1 then
 				player.animation = 0
