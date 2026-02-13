@@ -178,7 +178,7 @@ end
 function opponents.remove_item(tabl, calc_removal_function)
 	local number_removed = 0
 	for i=1,#tabl do
-		if calc_removal_function(tabl[i]) then
+		while i + number_removed <= #tabl and calc_removal_function(tabl[i + number_removed]) do
 			number_removed = number_removed + 1 -- add to the number of removed items
 		end
 		if number_removed + i > #tabl then
